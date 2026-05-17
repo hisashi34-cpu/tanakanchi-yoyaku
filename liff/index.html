@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>たなかんち2 ご予約</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1 id="shopName">たなかんち2</h1>
+    <p class="sub">ご予約フォーム</p>
+  </header>
+
+  <main id="app">
+    <!-- ローディング -->
+    <section id="loading" class="screen visible">
+      <p class="muted">読み込み中…</p>
+    </section>
+
+    <!-- メニュー -->
+    <section id="menu" class="screen">
+      <div class="card">
+        <button class="btn primary" data-jump="step-party">新しく予約する</button>
+        <button class="btn" data-jump="my-reservations">予約を確認・キャンセル</button>
+      </div>
+      <p class="note">15名以上の貸切ご予約は、お電話（<a id="telLink" href="#">店舗</a>）にてお問い合わせください。</p>
+    </section>
+
+    <!-- 人数選択 -->
+    <section id="step-party" class="screen">
+      <h2>ご利用人数</h2>
+      <div class="grid grid-3" id="partyGrid"></div>
+      <p class="note" id="partyNote"></p>
+      <div class="actions">
+        <button class="btn ghost" data-jump="menu">戻る</button>
+      </div>
+    </section>
+
+    <!-- 日付選択 -->
+    <section id="step-date" class="screen">
+      <h2>ご来店日</h2>
+      <div id="calendar"></div>
+      <div class="actions">
+        <button class="btn ghost" data-jump="step-party">戻る</button>
+      </div>
+    </section>
+
+    <!-- 時刻選択 -->
+    <section id="step-time" class="screen">
+      <h2>ご来店時刻</h2>
+      <p id="dateLabel" class="muted"></p>
+      <div class="grid grid-3" id="timeGrid"></div>
+      <p class="note">滞在は約2時間です。最終ご来店は20:00です。</p>
+      <div class="actions">
+        <button class="btn ghost" data-jump="step-date">戻る</button>
+      </div>
+    </section>
+
+    <!-- 席種選択 -->
+    <section id="step-seat" class="screen">
+      <h2>お席のご希望</h2>
+      <div class="grid grid-2" id="seatGrid">
+        <button class="btn-tile" data-seat="">おまかせ</button>
+        <button class="btn-tile" data-seat="個室">個室希望</button>
+      </div>
+      <p class="note">個室は1卓のみのため、希望時刻に空きがない場合がございます。</p>
+      <div class="actions">
+        <button class="btn ghost" data-jump="step-time">戻る</button>
+      </div>
+    </section>
+
+    <!-- コース選択 -->
+    <section id="step-course" class="screen">
+      <h2>コース選択</h2>
+      <div class="grid grid-1">
+        <button class="btn-tile" data-course="席のみ">席のみ予約</button>
+        <button class="btn-tile" data-course="飲み放題">飲み放題コース<br /><small id="coursePrice">¥6,000</small></button>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" data-jump="step-seat">戻る</button>
+      </div>
+    </section>
+
+    <!-- 連絡先 -->
+    <section id="step-contact" class="screen">
+      <h2>お電話番号</h2>
+      <p class="muted">当日のご連絡用です。</p>
+      <input type="tel" id="phone" placeholder="09012345678" inputmode="numeric" />
+      <div class="actions">
+        <button class="btn ghost" data-jump="step-course">戻る</button>
+        <button class="btn primary" id="toConfirm">確認画面へ</button>
+      </div>
+    </section>
+
+    <!-- 確認 -->
+    <section id="step-confirm" class="screen">
+      <h2>ご予約内容の確認</h2>
+      <dl class="confirm">
+        <dt>日時</dt><dd id="confDate"></dd>
+        <dt>人数</dt><dd id="confParty"></dd>
+        <dt>席</dt><dd id="confSeat"></dd>
+        <dt>コース</dt><dd id="confCourse"></dd>
+        <dt>お電話</dt><dd id="confPhone"></dd>
+      </dl>
+      <div class="actions">
+        <button class="btn ghost" data-jump="step-contact">戻る</button>
+        <button class="btn primary" id="submit">予約を確定する</button>
+      </div>
+      <p id="submitError" class="error"></p>
+    </section>
+
+    <!-- 完了 -->
+    <section id="step-done" class="screen">
+      <h2>ご予約が完了しました🌸</h2>
+      <p class="muted">LINEに予約内容を送信しました。</p>
+      <dl class="confirm" id="doneSummary"></dl>
+      <div class="actions">
+        <button class="btn primary" data-jump="menu" id="backToMenu">メニューに戻る</button>
+      </div>
+    </section>
+
+    <!-- 予約確認 -->
+    <section id="my-reservations" class="screen">
+      <h2>予約の確認</h2>
+      <div id="myList"></div>
+      <div class="actions">
+        <button class="btn ghost" data-jump="menu">戻る</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>たなかんち2 / お問い合わせ <a id="telFoot" href="#">店舗</a></p>
+  </footer>
+
+  <!-- 設定 -->
+  <script>
+    window.APP_CONFIG = {
+      // LIFFアプリのID（LINE Developersコンソールで作成して貼り付け）
+      LIFF_ID: 'YOUR_LIFF_ID',
+      // GAS Web Appのデプロイ後URL（https://script.google.com/macros/s/.../exec）
+      GAS_URL: 'YOUR_GAS_WEBAPP_URL'
+    };
+  </script>
+  <script src="./app.js"></script>
+</body>
+</html>

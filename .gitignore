@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+.vercel/
+.idea/
+.vscode/
+*.log
+
+# clasp（GASをローカル管理する場合に使う）
+.clasprc.json
+.clasp.json
