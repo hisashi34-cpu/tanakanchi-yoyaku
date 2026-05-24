@@ -27,9 +27,15 @@ function pad2_(n) {
 }
 
 /**
- * "HH:mm" → 分（0-1439）
+ * "HH:mm" or Date → 分（0-1439）
+ * スプレッドシートが '17:00' を Date('1899-12-30 17:00 JST') に自動変換するため両対応する。
  */
 function timeToMin_(hhmm) {
+  if (hhmm instanceof Date) {
+    const s = Utilities.formatDate(hhmm, 'Asia/Tokyo', 'HH:mm');
+    const md = s.match(/^(\d{1,2}):(\d{2})$/);
+    return parseInt(md[1], 10) * 60 + parseInt(md[2], 10);
+  }
   const m = String(hhmm).match(/^(\d{1,2}):(\d{2})$/);
   if (!m) throw new Error('不正な時刻: ' + hhmm);
   return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
